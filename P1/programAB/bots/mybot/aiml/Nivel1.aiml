@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aiml version="2.0">
+
+<category>
+    <pattern> Hola </pattern>
+    <template>Hola!</template>
+</category>
+
+<category>
+    <pattern> Tiene+ cita el (dia) * a las *  </pattern>
+    <template>Voy a mirar</template>
+    <template>
+   
+    <set var="libre"><srai>IS BUSY DAY <star/> AT <star index ="2"/></srai></set>
+    <set name="fecha"><star/> </set>
+    
+    <condition var="libre">
+        <li value="FALSE"> Ese hueco esta libre :) <srai> MARK OCUPADO AT <star index ="2"/> ON <star/></srai></li>
+        <li value="TRUE"> Ese hueco esta ocupado, Pero tengo hueco ese dia de <srai> HORAS LIBRES </srai>
+        
+
+        </li>
+    </condition>    
+    </template>
+</category>
+
+
+<category>
+    <pattern> horas libres mañana</pattern>
+    <template>
+    <think>
+    <set var="contador"> 8 </set>
+    <set var="horas"><srai> LIST OF DAY <get name="fecha"/> </srai> </set>
+    <set var="horas_mañana"> <srai> SUBLIST FROM 9 TO 13 OF <get var="horas"/> </srai> </set>
+    <set var="hora"><srai> ITERATE <get var="horas_mañana"/> </srai> </set>
+    <set var="ocupado"> </set>
+    <set name="mañana_ocupada"> <srai> FINDITEM null IN <get var="horas_mañana"/> </srai> </set>
+    <set var="libres"> </set> 
+   
+
+    <condition var="hora">
+        <li value="$"> </li>
+        <li> 
+         <set var="ocupado"> <srai>COMPARE <get var="hora"/> WITH null  </srai> </set> 
+         
+        <condition var="ocupado">
+            <li value="YES"> 
+            <set var="cont_transformado"> <map name="horas"> <get var="contador"/> </map> </set>
+            <set var="libres"> <get var="libres"/> <get var="cont_transformado"/>:00 </set> 
+            </li> 
+        </condition>
+
+        <set var="contador"> <srai> PLUS <get var="contador"/> 1 </srai> </set>  
+      <think>  <set var="hora"> <srai> NEXT </srai> </set> </think>
+        <loop/>
+        </li>
+    </condition>
+    </think>
+    <get var="libres"/>
+    </template>
+</category>
+
+
+<category>
+    <pattern> lista * </pattern>
+    <template><srai>LIST OF DAY <star/> </srai></template>
+</category>
+
+<category>
+    <pattern> horas libres tarde</pattern>
+    <template>
+    <think>
+    <set var="contador"> 13 </set>
+    <set var="horas"><srai> LIST OF DAY <get name="fecha"/> </srai> </set>
+    <set var="horas_tarde"> <srai> SUBLIST FROM  14 TO 21 OF <get var="horas"/> </srai> </set>
+    <set var="hora"><srai> ITERATE <get var="horas_tarde"/> </srai> </set>
+    <set var="ocupado"> </set>
+    <set name="tarde_ocupada"> <srai> FINDITEM null IN <get var="horas_tarde"/> </srai> </set>
+    <set var="libres"> </set> 
+   
+
+    <condition var="hora">
+        <li value="$"> </li>
+        <li> 
+         <set var="ocupado"> <srai>COMPARE <get var="hora"/> WITH null  </srai> </set> 
+         
+        <condition var="ocupado">
+            <li value="YES"> <set var="libres"> <get var="libres"/> <get var="contador"/>:00 </set> </li> 
+        </condition>
+
+        <set var="contador"> <srai> PLUS <get var="contador"/> 1 </srai> </set>  
+      <think>  <set var="hora"> <srai> NEXT </srai> </set> </think>
+        <loop/>
+        </li>
+    </condition>
+    </think>
+    <get var="libres"/>
+    </template>
+</category>
+
+
+<category>
+    <pattern> lista * </pattern>
+    <template><srai>LIST OF DAY <star/> </srai></template>
+</category>
+
+
+
+
+
+<category>
+    <pattern> Tiene+ [hueco cita] el (dia) * de * </pattern>
+    <template>
+    <think>
+
+
+    <set var="dia"> <star/> </set>
+    <set var="mes"> <map name="month_index_ES"> <star index="2"/> </map> </set>
+    <set name="mes_letra"> <star index="2"/> </set>
+    <set name="fecha"> <get var="dia"/>-<get var="mes"/>-20 </set>
+    <set var="horas"><srai> LIST OF DAY <get name="fecha"/> </srai> </set>
+    
+    <set var="horas_libres_mañana"> <srai> HORAS LIBRES MAÑANA </srai> </set>
+    <set var="horas_libres_tarde"> <srai> HORAS LIBRES TARDE </srai> </set>
+    <set var="ocupado"> <srai> FINDITEM null IN <get var="horas"/> </srai> </set>
+   
+    </think>
+    <condition var="ocupado">
+        <li value="0"> 
+            El dia  <get name="fecha"/> esta ocupado 
+            Quiere cita otro dia
+    
+        </li>
+        <li>
+            
+                    <think> <set name="horas_libres"> <get var="horas_libres_mañana"/> <get var="horas_libres_tarde"/> </set> </think>
+                    En el dia <get name="fecha"/> 
+                    Hay huecos por la mañana a las <get var="horas_libres_mañana"/>
+                    Hay huecos por la tarde a las <get var="horas_libres_tarde"/>
+                    Quiere alguno en concreto
+                
+        </li>
+    </condition>
+    
+    
+    
+    </template>
+</category>
+
+
+<category>
+    <pattern> Si a las *  </pattern>
+    <that> ^ Quiere alguno en concreto </that>
+    <template>
+    <srai> MARK OCUPADO AT <star/> ON <get name="fecha"/> </srai>
+    Perfectisimo, estas apuntado.
+    Quiere cita otro dia
+    </template>
+</category>
+
+<category>
+    <pattern> No  </pattern>
+    <that> ^ Quiere alguno en concreto </that>
+    <template>
+    Quiere cita otro dia
+    </template>
+</category>
+
+<category>
+    <pattern> Me da igual  </pattern>
+    <that> ^ Quiere alguno en concreto </that>
+    <template>
+    <set name="hora_medaigual"> <srai> TOP <get name="horas_libres"/>  </srai> </set>
+     Te parece bien a las <get name="hora_medaigual"/>
+    </template>
+</category>
+
+<category>
+    <pattern> Si  </pattern>
+    <that> ^ Te parece bien a las * </that>
+    <template>
+     <srai> MARK OCUPADO AT <get name="hora_medaigual"/> ON <get name="fecha"/> </srai>
+    Perfectisimo, estas apuntado.
+    Quiere cita otro dia
+    </template>
+</category>
+
+
+<category>
+    <pattern> No  </pattern>
+    <that> ^ Te parece bien a las * </that>
+    <template>
+    <think>
+     <set name="horas_libres"> <srai> REMAIN <get name="horas_libres"/> </srai> </set>
+     <set name="hora_medaigual"> <srai> TOP <get name="horas_libres"/>  </srai> </set>
+     </think>
+     <condition name="hora_medaigual">
+     <li value="$"> 
+     No tengo mas horas disponibles
+     Quiere cita otro dia
+     </li>
+     <li>
+      Te parece bien a las <get name="hora_medaigual"/>
+      </li>
+     </condition>
+   
+    
+   
+    </template>
+</category>
+
+<category>
+    <pattern> Si el *  </pattern>
+    <that> ^ Quiere cita otro dia </that>
+    <template>
+   <srai> TIENE CITA EL <star/> DE <get name="mes_letra"/> </srai> 
+    </template>
+</category>
+
+<category>
+    <pattern> Si  </pattern>
+    <that> ^ Quiere cita otro dia </that>
+    <template>
+    Cuando
+    </template>
+</category>
+
+<category>
+    <pattern> El *  </pattern>
+    <that> ^ Cuando </that>
+    <template>
+    <srai> TIENE CITA EL <star/> DE <get name="mes_letra"/> </srai>
+    </template>
+</category>
+
+<category>
+    <pattern> No  </pattern>
+    <that> ^ Quiere cita otro dia </that>
+    <template>
+    Pues hasta luego brosio
+    </template>
+</category>
+
+
+
+
+<category>
+    <pattern> busy * a las * </pattern>
+    <template>
+    <srai> IS BUSY DAY <star/> AT <star index="2"/>:00 </srai>
+    </template>
+</category>
+
+
+
+
+</aiml>

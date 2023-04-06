@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aiml version="2.0">
+
+
+
+
+<category>
+    <pattern> ^ Tiene+ [hueco cita] ^ maniana </pattern>
+    <template>
+    <think>
+    <set var="cuando"> <star index="2"/> </set>
+    <condition var="cuando">
+    <li value="pasado">
+    <set var="fecha">  <srai>  TOMORROWDATE <srai> DATE TOMORROW </srai> </srai> </set>
+    </li>
+    <li>
+    <set var="fecha">  <srai> DATE TOMORROW </srai> </set>
+    </li>
+    </condition>
+
+    <set var="dia">  <srai> SUBLIST FROM 1 TO 1 OF <get var="fecha"/> </srai> </set>
+    <set var="mes">  <srai> SUBLIST FROM 2 TO 2 OF <get var="fecha"/> </srai> </set>
+    <set var="año">  <srai> SUBLIST FROM 3 TO 3 OF <get var="fecha"/> </srai> </set>
+
+    </think>
+    <srai> TIENE CITA EL <get var="dia"/> DE <get var="mes"/> </srai> 
+    </template>
+</category>
+
+
+
+<category>
+    <pattern> ^ Tiene+ [hueco cita] ^ maniana por la * </pattern>
+    <template>
+    <think>
+    <set var="cuando"> <star index="2"/> </set>
+    <condition var="cuando">
+    <li value="pasado">
+    <set var="fecham">  <srai>  TOMORROWDATE <srai> DATE TOMORROW </srai> </srai> </set>
+    </li>
+    <li>
+    <set var="fecham">  <srai> DATE TOMORROW </srai> </set>
+    </li>
+    </condition>
+
+    <set var="dia">  <srai> SUBLIST FROM 1 TO 1 OF <get var="fecham"/> </srai> </set>
+    <set var="mes">  <srai> SUBLIST FROM 2 TO 2 OF <get var="fecham"/> </srai> </set>
+    <set var="mes_numero"> <map name="month_index_ES"> <get var="mes"/> </map> </set>
+    <set var="año">  <srai> SUBLIST FROM 3 TO 3 OF <get var="fecham"/> </srai> </set>
+    <set name="horario"> <star index="3"/> </set>
+   
+    <set name="fecha"> <get var="dia"/>-<get var="mes_numero"/>-<get var="año"/> </set>
+    <set var="horas"><srai> LIST OF DAY <get name="fecha"/> </srai> </set>
+    
+    <set var="horas_libres_mañana"> <srai> HORAS LIBRES MAÑANA </srai> </set>
+    <set var="horas_libres_tarde"> <srai> HORAS LIBRES TARDE </srai> </set>
+    <set var="ocupado"> <srai> FINDITEM null IN <get var="horas"/> </srai> </set>
+   
+    </think>
+    <condition var="ocupado">
+        <li value="0"> 
+            El dia  <get name="fecha"/> esta ocupado 
+            Quiere cita otro dia
+    
+        </li>
+        <li>
+            <condition name="horario">
+                <li value="maniana">
+                    <condition name="mañana_ocupada">
+                        <li value="0"> 
+                            La mañana esta ocupada
+                            Quiere cita por la tarde
+                        </li>
+                        <li>
+                            <think> <set name="horas_libres"> <get var="horas_libres_mañana"/> </set> </think>
+                            En el dia  <get name="fecha"/> hay huecos por la mañana a las <get var="horas_libres_mañana"/>
+                            Quiere alguno en concreto
+                        </li>
+                    </condition>
+                </li>
+                <li value="tarde">
+                    <condition name="tarde_ocupada">
+                        <li value="0"> 
+                            La tarde esta ocupada
+                            Quiere cita por la mañana
+                        </li>
+                        <li>
+                            <think> <set name="horas_libres"> <get var="horas_libres_tarde"/> </set> </think>
+                            En el dia  <get name="fecha"/> hay huecos por la tarde a las <get var="horas_libres_tarde"/>
+                            Quiere alguno en concreto
+                        </li>
+                    </condition>
+                </li>
+                </condition>
+        </li>
+    </condition>
+    
+    
+    
+    </template>
+</category>
+
+<category>
+    <pattern> ^ Tiene+ [hueco cita] el proximo * </pattern>
+    <template>
+    <think>
+    <set var="dias_restantes">  <srai> DAYS UNTIL <star index="2"/> </srai> </set>
+    con
+    <set var="fecha">  <srai> DATE TOMORROW </srai> </set>
+
+    
+    <set var="dia">  <srai> SUBLIST FROM 1 TO 1 OF <get var="fecha"/> </srai> </set>
+    <set var="mes">  <srai> SUBLIST FROM 2 TO 2 OF <get var="fecha"/> </srai> </set>
+    <set var="año">  <srai> SUBLIST FROM 3 TO 3 OF <get var="fecha"/> </srai> </set>
+
+    </think>
+    <srai> TIENE CITA EL <get var="dia"/> DE <get var="mes"/> </srai> 
+    </template>
+</category>
+
+
+
+<category>
+    <pattern> Si  </pattern>
+    <that> ^ Quiere cita por la mañana </that>
+    <template>
+    <srai> TIENE CITA MANIANA POR LA MANIANA </srai>
+    </template>
+</category>
+
+<category>
+    <pattern> Si  </pattern>
+    <that> ^ Quiere cita por la tarde </that>
+    <template>
+    <srai> TIENE CITA MANIANA POR LA TARDE </srai>
+    </template>
+</category>
+
+<category>
+    <pattern>  No </pattern>
+    <that> ^ Quiere cita por la mañana </that>
+    <template>
+    Quiere cita otro dia
+    </template>
+</category>
+
+<category>
+    <pattern>  No </pattern>
+    <that> ^ Quiere cita por la tarde </that>
+    <template>
+    Quiere cita otro dia
+    </template>
+</category>
+
+
+
+<category>
+    <pattern> maniana * </pattern>
+    <template>  
+    <srai> DAY </srai> 
+    <srai> DATE ON <star/> </srai> 
+    
+    
+    </template>
+</category>
+
+</aiml>
+
+
